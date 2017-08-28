@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 import static org.junit.Assert.*;
 
@@ -21,10 +22,10 @@ public class ExampleUnitTest {
     private List<String> dayOff = new ArrayList<>();
 
     final SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
-    final SimpleDateFormat format2 = new SimpleDateFormat("yyyy.MM.dd(E)");
+    final SimpleDateFormat format2 = new SimpleDateFormat("yyyy.MM.dd(E)", Locale.KOREAN);
 
-    private final String startDate = "2017.07.31";
-    private final String endDate = "2017.08.31";
+    private final String startDate = "2017.09.01";
+    private final String endDate = "2017.09.30";
     private Calendar mStartCalendar;
     private Calendar mEndCalendar;
     private List<String> mRotaionDate = new ArrayList<>();
@@ -99,27 +100,31 @@ public class ExampleUnitTest {
     }
 
     private void setupHumanList() {
-        humanList.add("민경환");
-        humanList.add("강아연");
-        humanList.add("김봄이");
-        humanList.add("오진주");
+        humanList.add(getName("민경환"));
+        humanList.add(getName("강아연"));
+        humanList.add(getName("김봄이"));
+        humanList.add(getName("오진주"));
 
-        humanList.add("김창현");
-        humanList.add(" 박민");
-        humanList.add("이주영");
-        humanList.add("이윤희");
+        humanList.add(getName("김창현"));
+        humanList.add(getName("박민"));
+        humanList.add(getName("이근호"));
+        humanList.add(getName("이윤희"));
 
-        humanList.add("김웅찬");
-        humanList.add("박숙희");
-        humanList.add("하태석");
-        humanList.add("이재용");
+        humanList.add(getName("김웅찬"));
+        humanList.add(getName("박숙희"));
+        humanList.add(getName("하태석"));
+        humanList.add(getName("이재용"));
 
-        humanList.add("이동원");
-        humanList.add(" 김난");
-        humanList.add("박광현");
-        humanList.add("유현석");
+        humanList.add(getName("이동원"));
+        humanList.add(getName("김난"));
+        humanList.add(getName("박광현"));
+        humanList.add(getName("유현석"));
 
-        humanList.add("정지혜");
+        humanList.add(getName("정지혜"));
+    }
+
+    private String getName(String name) {
+        return String.format("%3s", name);
     }
 
     private void createOffDay() {
@@ -128,6 +133,8 @@ public class ExampleUnitTest {
         dayOff.add("2017.08.02");
         dayOff.add("2017.08.03");
         dayOff.add("2017.08.04");
+        dayOff.add("2017.08.15"); // 광복절
+        dayOff.add("2017.08.25"); // 워크샵
         // 토요일, 일요일 계산
         // 쉬는날 계산
         try {
