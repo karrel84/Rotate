@@ -1,5 +1,7 @@
 package com.karrel.rotate;
 
+import android.util.Log;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -24,11 +26,14 @@ public class ExampleUnitTest {
     final SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
     final SimpleDateFormat format2 = new SimpleDateFormat("yyyy.MM.dd(E)", Locale.KOREAN);
 
-    private final String startDate = "2017.09.01";
-    private final String endDate = "2017.09.30";
+    private final String startDate = "2017.10.31";
+    private final String endDate = "2017.12.1";
     private Calendar mStartCalendar;
     private Calendar mEndCalendar;
     private List<String> mRotaionDate = new ArrayList<>();
+
+    // 하루에 일퇴하는 사람의 수이다
+    private final int rotateCount = 5;
 
     @Before
     public void before() {
@@ -47,7 +52,7 @@ public class ExampleUnitTest {
         int idx = 0;
         while (hasNext) {
             final int dayOfWeek = sCalendar.get(Calendar.DAY_OF_WEEK);
-            if (!(dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) && !isOffDay(sCalendar)) {
+            if (!(dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY || dayOfWeek == Calendar.FRIDAY) && !isOffDay(sCalendar)) {
                 StringBuilder builder = new StringBuilder();
 
                 // 월요일이면 한칸띄움
@@ -58,10 +63,16 @@ public class ExampleUnitTest {
                 builder.append(" > ");
 
                 // 4명중 한명씩 로테이션 돌림
-                for (int i = 0; i < 4; i++) {
+                for (int i = 0; i < rotateCount; i++) {
                     if (i != 0) builder.append(", ");
-                    builder.append(humanList.get(idx % humanList.size()));
+                    int cnt = idx % humanList.size();
+                    builder.append(humanList.get(cnt));
                     idx++;
+
+                    // 마지막까지 다 돌았으면 목록을 로테이트 시킨다.
+                    if (cnt + 1 == humanList.size()) {
+                        rotateHumanList();
+                    }
                 }
                 // 한줄 추가
                 mRotaionDate.add(builder.toString());
@@ -73,6 +84,14 @@ public class ExampleUnitTest {
         }
 
         printList(mRotaionDate);
+    }
+
+    private void rotateHumanList() {
+        System.out.println(humanList);
+        for (int i = 0; i < rotateCount; i++) {
+            String s = humanList.remove(0);
+            humanList.add(s);
+        }
     }
 
     private boolean isOffDay(Calendar sCalendar) {
@@ -100,6 +119,19 @@ public class ExampleUnitTest {
     }
 
     private void setupHumanList() {
+        humanList.add(getName("박숙희"));
+        humanList.add(getName("이주영"));
+        humanList.add(getName("하태석"));
+        humanList.add(getName("이재용"));
+        humanList.add(getName("이동원"));
+
+        humanList.add(getName("김난"));
+        humanList.add(getName("박광현"));
+        humanList.add(getName("유현석"));
+        humanList.add(getName("정지혜"));
+        humanList.add(getName("신찬용"));
+
+        humanList.add(getName("조성구"));
         humanList.add(getName("민경환"));
         humanList.add(getName("강아연"));
         humanList.add(getName("김봄이"));
@@ -109,18 +141,8 @@ public class ExampleUnitTest {
         humanList.add(getName("박민"));
         humanList.add(getName("이근호"));
         humanList.add(getName("이윤희"));
-
         humanList.add(getName("김웅찬"));
-        humanList.add(getName("박숙희"));
-        humanList.add(getName("하태석"));
-        humanList.add(getName("이재용"));
 
-        humanList.add(getName("이동원"));
-        humanList.add(getName("김난"));
-        humanList.add(getName("박광현"));
-        humanList.add(getName("유현석"));
-
-        humanList.add(getName("정지혜"));
     }
 
     private String getName(String name) {
