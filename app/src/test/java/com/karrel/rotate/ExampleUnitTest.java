@@ -22,8 +22,8 @@ public class ExampleUnitTest {
     final SimpleDateFormat format = new SimpleDateFormat("yyyy.MM.dd");
     final SimpleDateFormat format2 = new SimpleDateFormat("yyyy.MM.dd(E)", Locale.KOREAN);
 
-    private final String startDate = "2018.01.01";
-    private final String endDate = "2018.01.31";
+    private final String startDate = "2018.02.05";
+    private final String endDate = "2018.02.31";
     private Calendar mStartCalendar;
     private Calendar mEndCalendar;
     private List<String> mRotaionDate = new ArrayList<>();
@@ -36,7 +36,59 @@ public class ExampleUnitTest {
     }
 
     @Test
-    public void cal3() {
+    public void calClean() {
+        Calendar sCalendar = (Calendar) mStartCalendar.clone();
+        Calendar eCalendar = (Calendar) mEndCalendar.clone();
+
+        // 1주의 금요일씩 돌린다.
+
+        boolean hasNext = sCalendar.getTimeInMillis() < eCalendar.getTimeInMillis();
+        sCalendar.set(Calendar.DAY_OF_WEEK, Calendar.FRIDAY);
+        StringBuilder builder = new StringBuilder();
+        int index = 0;
+        while (hasNext) {
+            // 쉬는 날이 아니면 로테이션
+            if (isOffDay(sCalendar)) {
+                // add week
+                sCalendar.add(Calendar.WEEK_OF_MONTH, 1);
+                // check hasNext
+                hasNext = sCalendar.getTimeInMillis() < eCalendar.getTimeInMillis();
+                continue;
+            }
+
+            // 2018.02.09(금)
+            String date = format2.format(sCalendar.getTime());
+            builder.append("\n");
+            builder.append(date);
+            // 빗자루 5명, 유리 3명 마대 4명, 나머지 잉여
+            builder.append("\n빗자 : ");
+            for (int i = 0; i < 5; i++) {
+                index = index % humanList.size();
+                builder.append(" " + humanList.get(index++));
+            }
+            builder.append("\n유리 : ");
+            for (int i = 0; i < 3; i++) {
+                index = index % humanList.size();
+                builder.append(" " + humanList.get(index++));
+            }
+            builder.append("\n마대 : ");
+            for (int i = 0; i < 4; i++) {
+                index = index % humanList.size();
+                builder.append(" " + humanList.get(index++));
+            }
+            builder.append("\n");
+
+            // add week
+            sCalendar.add(Calendar.WEEK_OF_MONTH, 1);
+            // check hasNext
+            hasNext = sCalendar.getTimeInMillis() < eCalendar.getTimeInMillis();
+        }
+
+        System.out.println(builder.toString());
+    }
+
+    @Test
+    public void calWorkOut() {
         // 이번주에 몇바퀴 돌지 결정
         // 이번주 로테이션 가능 요일 만들기
         // 한주의 시작은 월요일이 되어야한다.
@@ -145,56 +197,6 @@ public class ExampleUnitTest {
         System.out.println(builder.toString());
     }
 
-    @Test
-    public void calcurate2() {
-        // 이번주에 몇바퀴 돌지 결정
-        // 이번주 로테이션 가능 요일 만들기
-        // 한주의 시작은 월요일이 되어야한다.
-        Calendar sCalendar = (Calendar) mStartCalendar.clone();
-        Calendar eCalendar = (Calendar) mEndCalendar.clone();
-
-        // 로테이션 돌 캘린더
-        Calendar weekCalendar;
-
-        StringBuilder builder = new StringBuilder();
-
-        // 이번주 월요일부터 금요일까지 체크
-        // 돌아오는주 월요일부터 목요일까지 가능날짜 체크
-        boolean hasNext = sCalendar.getTimeInMillis() < eCalendar.getTimeInMillis();
-        while (hasNext) {
-
-            System.out.println(format2.format(sCalendar.getTime()));
-            // 이번주 하루에 일퇴가능한 사람수 가져오기
-            int dayMan = getDayMan(sCalendar);
-
-            // 이번주 카운팅하면서 체크하면된다.
-            // 월요일부터 목요일까지 체크
-            Calendar tmpCal = (Calendar) sCalendar.clone();
-            for (int i = 0, idx = 0; i < 4; i++, tmpCal.add(Calendar.DAY_OF_WEEK, 1)) {
-                // 쉬는날이면 빼고
-                if (isOffDay(tmpCal)) {
-                    continue;
-                }
-                builder.append(format2.format(tmpCal.getTime()));
-                builder.append(" > ");
-                // 순차적으로 리스트에 담는다.
-                for (int j = 0; j < dayMan && idx < humanList.size(); j++) {
-                    builder.append(" " + humanList.get(idx++));
-                }
-                builder.append("\n");
-            }
-            builder.append("\n");
-
-
-            // 한주씩 더하자
-            sCalendar.add(Calendar.WEEK_OF_MONTH, 1);
-            // 루프체크
-            hasNext = sCalendar.getTimeInMillis() < eCalendar.getTimeInMillis();
-        }
-        System.out.println(builder.toString());
-
-//        printList(mRotaionDate);
-    }
 
     private int getDayMan(Calendar sCalendar) {
         // 해당 주의 카운팅을하기위해 클론
@@ -215,45 +217,6 @@ public class ExampleUnitTest {
         // 하루 일퇴 가능한 사람 수
         int dayMan = (int) Math.ceil((float) humanList.size() / (float) weekCount);
         return dayMan;
-    }
-
-    @Test
-    public void calcurate() {
-        Calendar sCalendar = (Calendar) mStartCalendar.clone();
-        Calendar eCalendar = (Calendar) mEndCalendar.clone();
-
-        // 루프돌지 결정
-        boolean hasNext = sCalendar.getTimeInMillis() < eCalendar.getTimeInMillis();
-        int idx = 0;
-        while (hasNext) {
-            final int dayOfWeek = sCalendar.get(Calendar.DAY_OF_WEEK);
-            // 주말이랑 쉬는날 제외
-            if (!(dayOfWeek == Calendar.SATURDAY || dayOfWeek == Calendar.SUNDAY) && !isOffDay(sCalendar)) {
-                StringBuilder builder = new StringBuilder();
-
-                // 월요일이면 한칸띄움
-                if (sCalendar.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) builder.append("\n");
-
-                // 날짜 입력
-                builder.append(format2.format(sCalendar.getTime()));
-                builder.append(" > ");
-
-                // 4명중 한명씩 로테이션 돌림
-                for (int i = 0; i < 4; i++) {
-                    if (i != 0) builder.append(", ");
-                    builder.append(humanList.get(idx % humanList.size()));
-                    idx++;
-                }
-                // 한줄 추가
-                mRotaionDate.add(builder.toString());
-            }
-            // 날짜 카운트 증가
-            sCalendar.add(Calendar.DAY_OF_MONTH, 1);
-            // 루프체크
-            hasNext = sCalendar.getTimeInMillis() < eCalendar.getTimeInMillis();
-        }
-
-        printList(mRotaionDate);
     }
 
     private boolean isOffDay(Calendar sCalendar) {
@@ -281,28 +244,26 @@ public class ExampleUnitTest {
     }
 
     private void setupHumanList() {
-
-        humanList.add(getName("민경환"));
-        humanList.add(getName("이근호"));
-        humanList.add(getName("이재용"));
-        humanList.add(getName("조성구"));
-        humanList.add(getName("박광현"));
+        humanList.add(getName("김웅찬"));
+        humanList.add(getName("오진주"));
+        humanList.add(getName("정지혜"));
+        humanList.add(getName("박민"));
+        humanList.add(getName("김창현"));
         humanList.add(getName("이주영"));
         humanList.add(getName("하태석"));
-        humanList.add(getName("홍경원"));
+        humanList.add(getName("이재용"));
         humanList.add(getName("강아연"));
-        humanList.add(getName("김봄이"));
-        humanList.add(getName("김웅찬"));
-        humanList.add(getName("박민"));
-        humanList.add(getName("박숙희"));
+        humanList.add(getName("홍경원"));
         humanList.add(getName("신찬용"));
-        humanList.add(getName("오진주"));
         humanList.add(getName("정지웅"));
-        humanList.add(getName("정지혜"));
-        humanList.add(getName("김난"));
-        humanList.add(getName("김창현"));
-        humanList.add(getName("이윤희"));
         humanList.add(getName("조광섭"));
+        humanList.add(getName("김봄이"));
+        humanList.add(getName("김난"));
+        humanList.add(getName("이윤희"));
+        humanList.add(getName("이근호"));
+        humanList.add(getName("조성구"));
+        humanList.add(getName("박광현"));
+        humanList.add(getName("최승용"));
     }
 
     private String getName(String name) {
@@ -312,6 +273,9 @@ public class ExampleUnitTest {
     private void createOffDay() {
         // 쉬는날추가
         dayOff.add("2018.01.01"); // 설날
+        dayOff.add("2018.03.01"); // 설날
+        dayOff.add("2018.02.15"); // 설날
+        dayOff.add("2018.02.16"); // 설날
 
         // 토요일, 일요일 계산
         // 쉬는날 계산
